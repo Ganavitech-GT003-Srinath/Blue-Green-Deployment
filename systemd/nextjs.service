@@ -1,0 +1,17 @@
+[Unit]
+Description=Next.js App
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/srv/nextjs
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /srv/nextjs/node_modules/next/dist/bin/next start -p 3000
+Restart=always
+RestartSec=5
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target
