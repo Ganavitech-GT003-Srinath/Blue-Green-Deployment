@@ -2,54 +2,34 @@ version: 0.2
 
 env:
   variables:
-    SSM_PREFIX: "/prod/nextjs"          # Change if you use a different prefix
-    REGION: "ap-south-1"
+    ARTIFACT_DIR: "/tmp/artifact"
 
 phases:
   install:
     runtime-versions:
       nodejs: 18
     commands:
-      - echo "🔧 Installing dependencies (jq + AWS CLI v2 if missing)"
+      - echo "🔧 Installing system dependencies"
       - apt-get update -y && apt-get install -y jq unzip
-      - |
-        if ! command -v aws >/dev/null 2>&1; then
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
-          unzip /tmp/awscliv2.zip -d /tmp
-          /tmp/aws/install
-        fi
-
   pre_build:
     commands:
-      - echo "🔑 Fetching build-time environment variables from SSM"
-      - |
-        PARAMS=$(aws ssm get-parameters-by-path \
-          --path "$SSM_PREFIX" \
-          --with-decryption \
-          --region "$REGION" 2>/dev/null || true)
-        if [ -n "$PARAMS" ]; then
-          echo "Writing .env.production from SSM parameters"
-          echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' \
-            | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
-          cat .env.production
-        else
-          echo "⚠️  No SSM parameters found under $SSM_PREFIX (continuing anyway)"
-        fi
-
+      - echo "🔑 Pre-build phase"
+      - echo "Checking for .env.production or creating a default one if needed"
+      - if [ ! -f .env.production ]; then echo "NEXT_PUBLIC_API_URL=http://example.com" > .env.production; fi
   build:
     commands:
-      - echo "📦 Installing production dependencies and building Next.js"
+      - echo "📦 Installing dependencies and building Next.js"
       - npm ci
       - npm run build
-
   post_build:
     commands:
       - echo "📦 Preparing artifact for CodeDeploy"
-      - mkdir -p $CODEBUILD_ARTIFACT_PATH
-      - cp -r .next package.json package-lock.json public next.config.js scripts systemd appspec.yml $CODEBUILD_ARTIFACT_PATH
-      - echo "✅ Build complete. Artifact ready."
+      - mkdir -p $ARTIFACT_DIR
+      - cp -r .next package.json next.config.js public $ARTIFACT_DIR/
+      - cp appspec.yml $ARTIFACT_DIR/ || true  # Only if appspec.yml exists
+      - echo "✅ Build completed and artifacts prepared"
 
 artifacts:
+  base-directory: $ARTIFACT_DIR
   files:
     - '**/*'
-  base-directory: $CODEBUILD_ARTIFACT_PATH
