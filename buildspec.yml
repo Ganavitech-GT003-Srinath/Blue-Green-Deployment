@@ -37,14 +37,18 @@ phases:
       - npm ci
       - npm run build
 
-  post_build:
+    post_build:
     commands:
       - echo "📦 Preparing artifact for CodeDeploy"
-      - mkdir -p $ARTIFACT_DIR              # ✅ FIXED
-      - cp -r .next package.json next.config.js public $ARTIFACT_DIR/
+      - mkdir -p $ARTIFACT_DIR
+      # ✅ Copy only files that exist
+      - if [ -d ".next" ]; then cp -r .next $ARTIFACT_DIR/; fi
+      - if [ -f "package.json" ]; then cp package.json $ARTIFACT_DIR/; fi
+      - if [ -f "next.config.js" ]; then cp next.config.js $ARTIFACT_DIR/; fi
+      - if [ -d "public" ]; then cp -r public $ARTIFACT_DIR/; fi
       - cp appspec.yml $ARTIFACT_DIR/ || true
       - echo "✅ Artifact prepared at $ARTIFACT_DIR"
-      - ls -l $ARTIFACT_DIR                 # ✅ Debugging: show what we are uploading
+      - ls -l $ARTIFACT_DIR              # ✅ Debugging: show what we are uploading
 
 artifacts:
   base-directory: /tmp/artifact   # ✅ Must match $ARTIFACT_DIR
