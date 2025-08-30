@@ -9,16 +9,27 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      - echo "🔧 Installing system dependencies"
+      - echo "🔧 Installing dependencies (jq + AWS CLI v2 if missing)"
       - apt-get update -y && apt-get install -y jq unzip
   pre_build:
     commands:
-      - echo "🔑 Pre-build phase"
-      - echo "Checking for .env.production or creating a default one if needed"
-      - if [ ! -f .env.production ]; then echo "NEXT_PUBLIC_API_URL=http://example.com" > .env.production; fi
+      - echo "🔑 Fetching build-time environment variables from SSM"
+      - |
+        PARAMS=$(aws ssm get-parameters-by-path \
+          --path "$SSM_PREFIX" \
+          --with-decryption \
+          --region "$REGION" 2>/dev/null || true)
+        if [ -n "$PARAMS" ]; then
+          echo "Writing .env.production from SSM parameters"
+          echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' \
+            | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
+          cat .env.production
+        else
+          echo "⚠️  No SSM parameters found under $SSM_PREFIX (continuing anyway)"
+        fi
   build:
     commands:
-      - echo "📦 Installing dependencies and building Next.js"
+      - echo "📦 Installing production dependencies and building Next.js"
       - npm ci
       - npm run build
   post_build:
@@ -26,10 +37,10 @@ phases:
       - echo "📦 Preparing artifact for CodeDeploy"
       - mkdir -p $ARTIFACT_DIR
       - cp -r .next package.json next.config.js public $ARTIFACT_DIR/
-      - cp appspec.yml $ARTIFACT_DIR/ || true  # Only if appspec.yml exists
-      - echo "✅ Build completed and artifacts prepared"
+      - cp appspec.yml $ARTIFACT_DIR/ || true
+      - echo "✅ Artifact prepared at $ARTIFACT_DIR"
 
 artifacts:
-  base-directory: $ARTIFACT_DIR
+  base-directory: /tmp/artifact
   files:
     - '**/*'
