@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    ARTIFACT_DIR: "/tmp/artifact"  # ✅ Our own directory path
+    ARTIFACT_DIR: "/tmp/artifact"  # ✅ Custom artifact directory
 
 phases:
   install:
@@ -11,6 +11,9 @@ phases:
     commands:
       - echo "🔧 Installing dependencies (jq + AWS CLI v2 if missing)"
       - apt-get update -y && apt-get install -y jq unzip
+      # (Optional) verify Node & npm versions
+      - node -v && npm -v
+
   pre_build:
     commands:
       - echo "🔑 Fetching build-time environment variables from SSM"
@@ -27,20 +30,23 @@ phases:
         else
           echo "⚠️  No SSM parameters found under $SSM_PREFIX (continuing anyway)"
         fi
+
   build:
     commands:
       - echo "📦 Installing production dependencies and building Next.js"
       - npm ci
       - npm run build
+
   post_build:
     commands:
       - echo "📦 Preparing artifact for CodeDeploy"
-      - mkdir -p $ARTIFACT_DIR               # ✅ USE OUR OWN VAR
+      - mkdir -p $ARTIFACT_DIR              # ✅ FIXED
       - cp -r .next package.json next.config.js public $ARTIFACT_DIR/
       - cp appspec.yml $ARTIFACT_DIR/ || true
       - echo "✅ Artifact prepared at $ARTIFACT_DIR"
+      - ls -l $ARTIFACT_DIR                 # ✅ Debugging: show what we are uploading
 
 artifacts:
-  base-directory: /tmp/artifact  # ✅ MUST MATCH ARTIFACT_DIR
+  base-directory: /tmp/artifact   # ✅ Must match $ARTIFACT_DIR
   files:
     - '**/*'
