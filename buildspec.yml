@@ -1,0 +1,50 @@
+version: 0.2
+
+env:
+  variables:
+    SSM_PREFIX: "/prod/nextjs"            # change if you use another prefix
+    REGION: "ap-south-1"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Installing aws cli v2 and jq (for SSM fetch)
+      - apt-get update -y
+      - apt-get install -y jq unzip
+      - |
+        if ! command -v aws >/dev/null 2>&1; then
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+          unzip /tmp/awscliv2.zip -d /tmp
+          /tmp/aws/install
+        fi
+  pre_build:
+    commands:
+      - echo "Get build-time env from SSM and write .env.production (if any)"
+      - |
+        aws ssm get-parameters-by-path --path "$SSM_PREFIX" --with-decryption --region $REGION \
+          | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' > /tmp/ssm_params || true
+      - |
+        if [ -s /tmp/ssm_params ]; then
+          echo "Writing .env.production"
+          awk -F'/' '{print $NF}' /tmp/ssm_params | while IFS= read -r line; do
+            echo "$line" >> .env.production
+          done
+        fi
+  build:
+    commands:
+      - echo "Install dependencies"
+      - npm ci
+      - echo "Run next build"
+      - npm run build
+  post_build:
+    commands:
+      - echo "Prepare artifact"
+      - mkdir -p deploy
+      - cp -r .next package.json package-lock.json public next.config.js scripts systemd appspec.yml deploy/ || true
+      - ls -la deploy
+artifacts:
+  files:
+    - deploy/**/*
+  base-directory: deploy
