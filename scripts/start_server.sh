@@ -1,10 +1,12 @@
 #!/bin/bash
 set -xe
 
-# Move to app directory
 cd /srv/nextjs
 
-# Start or restart service
+# Install dependencies (in case they aren't there)
+npm ci --only=production
+
+# Start service
 sudo systemctl daemon-reload
 sudo systemctl enable nextjs
 sudo systemctl restart nextjs

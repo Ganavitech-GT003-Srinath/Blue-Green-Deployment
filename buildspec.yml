@@ -35,26 +35,11 @@ phases:
       - npm ci
       - npm run build
 
-  post_build:
+    post_build:
     commands:
       - echo "📦 Preparing artifact for CodeDeploy"
       - mkdir -p "$ARTIFACT_DIR"
-
-      # Copy app build output
-      - cp -r .next "$ARTIFACT_DIR/" || true
-      - cp -r public "$ARTIFACT_DIR/" || true
-      - cp -r app "$ARTIFACT_DIR/" || true
-
-      # Copy configs & runtime files
-      - cp package.json "$ARTIFACT_DIR/" || true
-      - cp package-lock.json "$ARTIFACT_DIR/" || true
-      - cp next.config.js "$ARTIFACT_DIR/" || true
-      - cp -r scripts "$ARTIFACT_DIR/" || true
-      - cp -r systemd "$ARTIFACT_DIR/" || true
-      - cp appspec.yml "$ARTIFACT_DIR/" || true
-
-      - echo "✅ Artifact prepared"
-      - ls -R "$ARTIFACT_DIR"
+      - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR/" || true
 
 artifacts:
   base-directory: /tmp/artifact

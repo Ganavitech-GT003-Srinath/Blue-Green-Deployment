@@ -11,9 +11,6 @@ Environment=PORT=3000
 ExecStart=/usr/bin/npm start
 Restart=always
 RestartSec=5
-# Optional: If you want logs in files instead of journalctl
-# StandardOutput=file:/var/log/nextjs.log
-# StandardError=file:/var/log/nextjs.err
 
 [Install]
 WantedBy=multi-user.target
