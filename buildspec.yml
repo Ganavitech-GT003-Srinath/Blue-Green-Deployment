@@ -11,14 +11,14 @@ phases:
   pre_build:
     commands:
       - echo "Pre-build: optional SSM fetch (no-fail)"
-      - |
+      - >
         if [ -n "$SSM_PREFIX" ] && [ -n "$REGION" ]; then
-          PARAMS=$(aws ssm get-parameters-by-path --path "$SSM_PREFIX" --with-decryption --region "$REGION" 2>/dev/null || true)
+          PARAMS=$(aws ssm get-parameters-by-path --path "$SSM_PREFIX" --with-decryption --region "$REGION" 2>/dev/null || true);
           if [ -n "$PARAMS" ]; then
             echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' \
-              | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
-            echo "Wrote .env.production"
-          fi
+              | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production;
+            echo "Wrote .env.production";
+          fi;
         fi
   build:
     commands:
@@ -31,7 +31,7 @@ phases:
       - ARTIFACT_DIR="/tmp/artifact"
       - mkdir -p "$ARTIFACT_DIR"
       - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR/" || true
-      - chmod +x "$ARTIFACT_DIR"/scripts/*.sh   # 👈 Make scripts executable
+      - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
       - echo "Artifact contents:"
       - ls -la "$ARTIFACT_DIR"
 artifacts:
