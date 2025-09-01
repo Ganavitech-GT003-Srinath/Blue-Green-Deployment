@@ -24,3 +24,4 @@ npm ci --omit=dev
 # Ensure systemd unit file is in place
 cp -r systemd/nextjs.service /etc/systemd/system/nextjs.service || true
 systemctl daemon-reload
+
