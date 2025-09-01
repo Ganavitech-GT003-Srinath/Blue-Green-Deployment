@@ -45,7 +45,7 @@ phases:
       - if [ -f "package.json" ]; then cp package.json "$ARTIFACT_DIR/"; fi
       - if [ -f "package-lock.json" ]; then cp package-lock.json "$ARTIFACT_DIR/"; fi
       - if [ -f "next.config.js" ]; then cp next.config.js "$ARTIFACT_DIR/"; fi
-      - if [ -d "public" ]; then cp - publicr "$ARTIFACT_DIR/"; fi
+      - if [ -d "public" ]; then cp - public "$ARTIFACT_DIR/"; fi
       - if [ -d "scripts" ]; then cp -r scripts "$ARTIFACT_DIR/"; fi
       - if [ -d "systemd" ]; then cp -r systemd "$ARTIFACT_DIR/"; fi
       - cp appspec.yml "$ARTIFACT_DIR/" || true
