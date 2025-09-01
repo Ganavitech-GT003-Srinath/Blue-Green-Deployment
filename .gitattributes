@@ -1,0 +1,12 @@
+# Force shell scripts & systemd files to LF (Linux-friendly)
+*.sh text eol=lf
+*.service text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Let Windows handle CRLF for local dev if needed
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# For everything else, normalize to LF
+* text=auto
