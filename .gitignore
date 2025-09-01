@@ -46,5 +46,5 @@ scripts/*.tmp
 *.bak
 
 # Ignore public uploads (if any)
-public/uploads/
+# public/uploads/
 

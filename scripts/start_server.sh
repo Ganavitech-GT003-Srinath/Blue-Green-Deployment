@@ -1,12 +1,11 @@
 #!/bin/bash
 set -xe
 
-cd /srv/nextjs
+# stop service if running
+systemctl stop nextjs || true
 
-# Install dependencies (in case they aren't there)
-npm ci --only=production
+# Start the service (systemd-managed)
+systemctl start nextjs
 
-# Start service
-sudo systemctl daemon-reload
-sudo systemctl enable nextjs
-sudo systemctl restart nextjs
+# Give the app a few seconds to start
+sleep 3

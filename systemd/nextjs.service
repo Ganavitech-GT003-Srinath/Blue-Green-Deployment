@@ -8,9 +8,12 @@ User=ubuntu
 WorkingDirectory=/srv/nextjs
 Environment=NODE_ENV=production
 Environment=PORT=3000
-ExecStart=/usr/bin/npm start
+# Use full path to node/npm. Adapt if using nvm.
+ExecStart=/usr/bin/env bash -lc 'npm run start'
 Restart=always
 RestartSec=5
+StandardOutput=syslog
+StandardError=syslog
 
 [Install]
 WantedBy=multi-user.target

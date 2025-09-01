@@ -1,48 +1,39 @@
 version: 0.2
 
-env:
-  variables:
-    ARTIFACT_DIR: "/tmp/artifact"
-
 phases:
   install:
     runtime-versions:
       nodejs: 18
     commands:
-      - echo "🔧 Installing dependencies"
-      - apt-get update -y && apt-get install -y jq unzip
+      - echo "Installing prerequisites"
+      - apt-get update -y || true
       - node -v && npm -v
-
   pre_build:
     commands:
-      - echo "🔑 Fetching SSM parameters (optional)"
+      - echo "Pre-build: optional SSM fetch (no-fail)"
       - |
-        PARAMS=$(aws ssm get-parameters-by-path \
-          --path "$SSM_PREFIX" \
-          --with-decryption \
-          --region "$REGION" 2>/dev/null || true)
-        if [ -n "$PARAMS" ]; then
-          echo "Writing .env.production"
-          echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' \
-            | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
-        else
-          echo "⚠️ No SSM parameters found, continuing"
+        if [ -n "$SSM_PREFIX" ] && [ -n "$REGION" ]; then
+          PARAMS=$(aws ssm get-parameters-by-path --path "$SSM_PREFIX" --with-decryption --region "$REGION" 2>/dev/null || true)
+          if [ -n "$PARAMS" ]; then
+            echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' \
+              | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
+            echo "Wrote .env.production"
+          fi
         fi
-
   build:
     commands:
-      - echo "📦 Installing dependencies and building Next.js"
+      - echo "Installing app dependencies and building Next.js"
       - npm ci
       - npm run build
-
   post_build:
     commands:
-      - echo "📦 Preparing artifact for CodeDeploy"
+      - echo "Preparing artifact"
+      - ARTIFACT_DIR="/tmp/artifact"
       - mkdir -p "$ARTIFACT_DIR"
       - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR/" || true
-      - echo "✅ Artifact prepared"
-      - ls -R "$ARTIFACT_DIR"
-
+      - chmod +x "$ARTIFACT_DIR"/scripts/*.sh   # 👈 Make scripts executable
+      - echo "Artifact contents:"
+      - ls -la "$ARTIFACT_DIR"
 artifacts:
   base-directory: /tmp/artifact
   files:
