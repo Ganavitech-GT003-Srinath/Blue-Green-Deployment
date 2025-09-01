@@ -10,8 +10,9 @@ Environment=PORT=3000
 ExecStart=/usr/bin/npm run start
 Restart=always
 RestartSec=5
-StandardOutput=journal
-StandardError=journal
+StandardOutput=append:/var/log/nextjs.log
+StandardError=append:/var/log/nextjs.err
+
 
 [Install]
 WantedBy=multi-user.target
