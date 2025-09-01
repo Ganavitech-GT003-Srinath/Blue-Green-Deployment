@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -xe
 
-echo "🛑 Stopping Next.js service..."
-systemctl stop nextjs.service || true
+# Stop the Next.js service
+sudo systemctl stop nextjs || true

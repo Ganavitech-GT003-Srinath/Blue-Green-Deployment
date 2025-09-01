@@ -1,18 +1,19 @@
 [Unit]
-Description=Next.js SSR app
+Description=Next.js SSR App
 After=network.target
 
 [Service]
+Type=simple
 User=ubuntu
 WorkingDirectory=/srv/nextjs
 Environment=NODE_ENV=production
 Environment=PORT=3000
-ExecStart=/usr/bin/npm run start
+ExecStart=/usr/bin/npm start
 Restart=always
 RestartSec=5
-StandardOutput=append:/var/log/nextjs.log
-StandardError=append:/var/log/nextjs.err
-
+# Optional: If you want logs in files instead of journalctl
+# StandardOutput=file:/var/log/nextjs.log
+# StandardError=file:/var/log/nextjs.err
 
 [Install]
 WantedBy=multi-user.target

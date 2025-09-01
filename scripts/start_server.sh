@@ -1,12 +1,10 @@
-# #!/bin/bash
-# set -euo pipefail
-# systemctl enable nextjs.service
-# systemctl restart nextjs.service
-# sleep 3
-
 #!/bin/bash
+set -xe
+
+# Move to app directory
 cd /srv/nextjs
-npm install --production
-npm run build
-pm2 start npm --name "nextjs" -- start
-pm2 save
+
+# Start or restart service
+sudo systemctl daemon-reload
+sudo systemctl enable nextjs
+sudo systemctl restart nextjs

@@ -9,30 +9,29 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      - echo "🔧 Installing dependencies (jq + AWS CLI v2 if missing)"
+      - echo "🔧 Installing dependencies"
       - apt-get update -y && apt-get install -y jq unzip
       - node -v && npm -v
 
   pre_build:
     commands:
-      - echo "🔑 Fetching build-time environment variables from SSM"
+      - echo "🔑 Fetching SSM parameters (optional)"
       - |
         PARAMS=$(aws ssm get-parameters-by-path \
           --path "$SSM_PREFIX" \
           --with-decryption \
           --region "$REGION" 2>/dev/null || true)
         if [ -n "$PARAMS" ]; then
-          echo "Writing .env.production from SSM parameters"
+          echo "Writing .env.production"
           echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' \
             | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
-          cat .env.production
         else
-          echo "⚠️  No SSM parameters found under $SSM_PREFIX (continuing anyway)"
+          echo "⚠️  No SSM parameters found, continuing"
         fi
 
   build:
     commands:
-      - echo "📦 Installing production dependencies and building Next.js"
+      - echo "📦 Installing dependencies and building Next.js"
       - npm ci
       - npm run build
 
@@ -40,17 +39,22 @@ phases:
     commands:
       - echo "📦 Preparing artifact for CodeDeploy"
       - mkdir -p "$ARTIFACT_DIR"
-      # Copy build output and required runtime files
-      - if [ -d ".next" ]; then cp -r .next "$ARTIFACT_DIR/"; fi
-      - if [ -f "package.json" ]; then cp package.json "$ARTIFACT_DIR/"; fi
-      - if [ -f "package-lock.json" ]; then cp package-lock.json "$ARTIFACT_DIR/"; fi
-      - if [ -f "next.config.js" ]; then cp next.config.js "$ARTIFACT_DIR/"; fi
-      - if [ -d "public" ]; then cp - public "$ARTIFACT_DIR/"; fi
-      - if [ -d "scripts" ]; then cp -r scripts "$ARTIFACT_DIR/"; fi
-      - if [ -d "systemd" ]; then cp -r systemd "$ARTIFACT_DIR/"; fi
+
+      # Copy app build output
+      - cp -r .next "$ARTIFACT_DIR/" || true
+      - cp -r public "$ARTIFACT_DIR/" || true
+      - cp -r app "$ARTIFACT_DIR/" || true
+
+      # Copy configs & runtime files
+      - cp package.json "$ARTIFACT_DIR/" || true
+      - cp package-lock.json "$ARTIFACT_DIR/" || true
+      - cp next.config.js "$ARTIFACT_DIR/" || true
+      - cp -r scripts "$ARTIFACT_DIR/" || true
+      - cp -r systemd "$ARTIFACT_DIR/" || true
       - cp appspec.yml "$ARTIFACT_DIR/" || true
-      - echo "✅ Artifact prepared at $ARTIFACT_DIR"
-      - ls -l "$ARTIFACT_DIR"
+
+      - echo "✅ Artifact prepared"
+      - ls -R "$ARTIFACT_DIR"
 
 artifacts:
   base-directory: /tmp/artifact
