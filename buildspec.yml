@@ -36,3 +36,4 @@ artifacts:
   base-directory: /tmp/artifact
   files:
     - "**/*"
+    
