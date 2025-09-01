@@ -12,9 +12,9 @@ phases:
 
   pre_build:
     commands:
-      - echo "Pre-build: optional SSM fetch (no-fail)"
+      - echo "Pre-build step - optional SSM fetch (no-fail)"
       - chmod +x scripts/fetch_ssm_env.sh
-      - scripts/fetch_ssm_env.sh || true
+      - ./scripts/fetch_ssm_env.sh || true
 
   build:
     commands:
@@ -35,4 +35,4 @@ phases:
 artifacts:
   base-directory: /tmp/artifact
   files:
-    - '**/*'
+    - "**/*"
