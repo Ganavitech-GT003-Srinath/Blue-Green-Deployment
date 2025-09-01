@@ -25,15 +25,14 @@ phases:
   post_build:
     commands:
       - echo "Preparing artifact"
-      - ARTIFACT_DIR="/tmp/artifact"
+      - ARTIFACT_DIR="build_artifact"
       - mkdir -p "$ARTIFACT_DIR"
-      - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR/" || true
+      - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR"/ || true
       - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
       - echo "Artifact contents:"
       - ls -la "$ARTIFACT_DIR"
 
 artifacts:
-  base-directory: /tmp/artifact
+  base-directory: build_artifact
   files:
     - "**/*"
-    
