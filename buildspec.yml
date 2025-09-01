@@ -8,6 +8,7 @@ phases:
       - echo "Installing prerequisites"
       - apt-get update -y || true
       - node -v && npm -v
+
   pre_build:
     commands:
       - echo "Pre-build: optional SSM fetch (no-fail)"
@@ -15,16 +16,18 @@ phases:
         if [ -n "$SSM_PREFIX" ] && [ -n "$REGION" ]; then
           PARAMS=$(aws ssm get-parameters-by-path --path "$SSM_PREFIX" --with-decryption --region "$REGION" 2>/dev/null || true)
           if [ -n "$PARAMS" ]; then
-            echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' \
-              | sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
+            echo "$PARAMS" | jq -r '.Parameters[] | "\(.Name)=\(.Value)"' | \
+              sed -E "s|$SSM_PREFIX/([^=]+)=|\1=|" > .env.production
             echo "Wrote .env.production"
           fi
         fi
+
   build:
     commands:
       - echo "Installing app dependencies and building Next.js"
       - npm ci
       - npm run build
+
   post_build:
     commands:
       - echo "Preparing artifact"
@@ -34,6 +37,7 @@ phases:
       - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
       - echo "Artifact contents:"
       - ls -la "$ARTIFACT_DIR"
+
 artifacts:
   base-directory: /tmp/artifact
   files:
