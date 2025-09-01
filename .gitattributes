@@ -10,6 +10,3 @@
 
 # For everything else, normalize to LF
 * text=auto
-
-
-* text=auto eol=lf
