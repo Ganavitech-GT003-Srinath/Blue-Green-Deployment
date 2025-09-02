@@ -6,8 +6,7 @@ phases:
       nodejs: 18
     commands:
       - echo "Installing prerequisites"
-      - apt-get update -y || true
-      - apt-get install -y jq unzip || true
+      - if command -v apt-get >/dev/null 2>&1; then apt-get update -y || true; apt-get install -y jq unzip || true; fi
       - node -v && npm -v
 
   pre_build:
@@ -26,7 +25,7 @@ phases:
   post_build:
     commands:
       - echo "Preparing artifact for CodeDeploy"
-      - ARTIFACT_DIR="build_artifact"
+      - ARTIFACT_DIR=build_artifact
       - mkdir -p "$ARTIFACT_DIR"
       - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR"/
       - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
