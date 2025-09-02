@@ -1,17 +1,23 @@
 #!/bin/bash
 set -xe
 
-# Ensure directory exists and ownership
-mkdir -p /srv/nextjs
-chown -R ubuntu:ubuntu /srv/nextjs || true
+# Ensure the application directory exists
+APP_DIR="/srv/nextjs"
+mkdir -p "$APP_DIR"
+chown -R ubuntu:ubuntu "$APP_DIR" || true
 
-# Ensure Node available before any npm operations (but assume user-data installs Node)
-# If Node missing, try installing quickly (best-effort)
+# Check if Node.js is installed; install if missing
 if ! command -v node >/dev/null 2>&1; then
-  echo "Node not found; attempting quick install"
+  echo "Node.js not found. Installing Node.js 18.x..."
   curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
   apt-get install -y nodejs
 fi
 
-# Clean old app files (CodeDeploy will copy new files into /srv/nextjs)
-rm -rf /srv/nextjs/* || true
+# Clean old application files to prepare for fresh deployment
+if [ -d "$APP_DIR" ]; then
+  echo "Cleaning existing files in $APP_DIR..."
+  rm -rf "$APP_DIR"/* || true
+fi
+
+# Ensure proper ownership after cleanup
+chown -R ubuntu:ubuntu "$APP_DIR"
