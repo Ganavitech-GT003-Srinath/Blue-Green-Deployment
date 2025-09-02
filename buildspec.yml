@@ -6,7 +6,11 @@ phases:
       nodejs: 18
     commands:
       - echo "Installing prerequisites"
-      - 'if command -v apt-get >/dev/null 2>&1; then apt-get update -y || true; apt-get install -y jq unzip || true; fi'
+      - |
+        if command -v apt-get >/dev/null 2>&1; then
+          apt-get update -y || true
+          apt-get install -y jq unzip || true
+        fi
       - node -v && npm -v
 
   pre_build:
@@ -28,11 +32,15 @@ phases:
       - ARTIFACT_DIR=build_artifact
       - mkdir -p "$ARTIFACT_DIR"
       - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR"/
+      - echo "Making all scripts executable"
       - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
-      - echo "Artifact contents:"
+      - echo "Listing artifact contents for verification"
       - ls -l "$ARTIFACT_DIR"
+      - echo "Listing scripts permissions"
       - ls -l "$ARTIFACT_DIR/scripts"
+      - echo "Listing systemd service"
       - ls -l "$ARTIFACT_DIR/systemd"
+      - echo "Checking appspec.yml"
       - ls -l "$ARTIFACT_DIR/appspec.yml"
 
 artifacts:
