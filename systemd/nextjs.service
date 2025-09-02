@@ -1,19 +1,12 @@
-[Unit]
-Description=Next.js SSR App
-After=network.target
-
 [Service]
 Type=simple
 User=ubuntu
 WorkingDirectory=/srv/nextjs
 Environment=NODE_ENV=production
 Environment=PORT=3000
-# Use full path to node/npm. Adapt if using nvm.
-ExecStart=/usr/bin/env bash -lc 'npm run start'
+Environment=HOST=0.0.0.0
+ExecStart=/usr/bin/env PORT=$PORT HOST=$HOST /usr/bin/npm run start
 Restart=always
 RestartSec=5
 StandardOutput=syslog
 StandardError=syslog
-
-[Install]
-WantedBy=multi-user.target
