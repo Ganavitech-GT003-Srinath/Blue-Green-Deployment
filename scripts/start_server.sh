@@ -1,11 +1,8 @@
 #!/bin/bash
 set -xe
 
-# stop service if running
-systemctl stop nextjs || true
+# Start systemd service
+sudo systemctl start nextjs
 
-# Start the service (systemd-managed)
-systemctl start nextjs
-
-# Give the app a few seconds to start
-sleep 3
+# Wait a few seconds for service to initialize
+sleep 5

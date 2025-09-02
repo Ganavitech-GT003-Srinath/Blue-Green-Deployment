@@ -7,30 +7,38 @@ phases:
     commands:
       - echo "Installing prerequisites"
       - apt-get update -y || true
-      - apt-get install -y jq || true
+      - apt-get install -y jq unzip || true
       - node -v && npm -v
 
   pre_build:
     commands:
-      - echo "Pre-build step - optional SSM fetch (no-fail)"
+      - echo "Pre-build step: fetch environment variables (optional)"
       - chmod +x scripts/fetch_ssm_env.sh
       - ./scripts/fetch_ssm_env.sh || true
 
   build:
     commands:
-      - echo "Installing app dependencies and building Next.js"
+      - echo "Installing app dependencies"
       - npm ci
+      - echo "Building Next.js app"
       - npm run build
 
   post_build:
     commands:
-      - echo "Preparing artifact"
+      - echo "Preparing artifact for CodeDeploy"
       - ARTIFACT_DIR="build_artifact"
       - mkdir -p "$ARTIFACT_DIR"
-      - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR"/ || true
+      - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR"/
+      - echo "Making all scripts executable"
       - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
-      - echo "Artifact contents:"
-      - ls -la "$ARTIFACT_DIR"
+      - echo "Listing artifact contents for verification"
+      - ls -l "$ARTIFACT_DIR"
+      - echo "Listing scripts permissions"
+      - ls -l "$ARTIFACT_DIR/scripts"
+      - echo "Listing systemd service"
+      - ls -l "$ARTIFACT_DIR/systemd"
+      - echo "Checking appspec.yml"
+      - ls -l "$ARTIFACT_DIR/appspec.yml"
 
 artifacts:
   base-directory: build_artifact

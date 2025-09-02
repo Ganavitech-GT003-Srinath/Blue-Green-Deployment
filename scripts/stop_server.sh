@@ -1,3 +1,7 @@
 #!/bin/bash
 set -xe
-systemctl stop nextjs || true
+
+# Stop the service if it exists
+if systemctl is-active --quiet nextjs; then
+  systemctl stop nextjs
+fi
