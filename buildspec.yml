@@ -5,39 +5,39 @@ phases:
     runtime-versions:
       nodejs: 18
     commands:
-      - echo "Installing prerequisites"
-      - if command -v apt-get >/dev/null 2>&1; then apt-get update -y || true && apt-get install -y jq unzip || true; fi
-      - node -v && npm -v
+      - "echo 'Installing prerequisites'"
+      - "if command -v apt-get >/dev/null 2>&1; then apt-get update -y || true && apt-get install -y jq unzip || true; fi"
+      - "node -v && npm -v"
 
   pre_build:
     commands:
-      - echo "Pre-build step: fetch environment variables (optional)"
-      - chmod +x scripts/fetch_ssm_env.sh
-      - ./scripts/fetch_ssm_env.sh || true
+      - "echo 'Pre-build step: fetch environment variables (optional)'"
+      - "chmod +x scripts/fetch_ssm_env.sh"
+      - "./scripts/fetch_ssm_env.sh || true"
 
   build:
     commands:
-      - echo "Installing app dependencies"
-      - npm ci
-      - echo "Building Next.js app"
-      - npm run build
+      - "echo 'Installing app dependencies'"
+      - "npm ci"
+      - "echo 'Building Next.js app'"
+      - "npm run build"
 
   post_build:
     commands:
-      - echo "Preparing artifact for CodeDeploy"
-      - ARTIFACT_DIR=build_artifact
-      - mkdir -p "$ARTIFACT_DIR"
-      - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR"/
-      - echo "Making all scripts executable"
-      - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
-      - echo "Listing artifact contents for verification"
-      - ls -l "$ARTIFACT_DIR"
-      - echo "Listing scripts permissions"
-      - ls -l "$ARTIFACT_DIR/scripts"
-      - echo "Listing systemd service"
-      - ls -l "$ARTIFACT_DIR/systemd"
-      - echo "Checking appspec.yml"
-      - ls -l "$ARTIFACT_DIR/appspec.yml"
+      - "echo 'Preparing artifact for CodeDeploy'"
+      - "ARTIFACT_DIR=build_artifact"
+      - "mkdir -p \"$ARTIFACT_DIR\""
+      - "cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml \"$ARTIFACT_DIR\"/"
+      - "echo 'Making all scripts executable'"
+      - "chmod +x \"$ARTIFACT_DIR\"/scripts/*.sh"
+      - "echo 'Listing artifact contents for verification'"
+      - "ls -l \"$ARTIFACT_DIR\""
+      - "echo 'Listing scripts permissions'"
+      - "ls -l \"$ARTIFACT_DIR/scripts\""
+      - "echo 'Listing systemd service'"
+      - "ls -l \"$ARTIFACT_DIR/systemd\""
+      - "echo 'Checking appspec.yml'"
+      - "ls -l \"$ARTIFACT_DIR/appspec.yml\""
 
 artifacts:
   base-directory: build_artifact
