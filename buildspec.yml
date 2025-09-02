@@ -29,15 +29,11 @@ phases:
       - ARTIFACT_DIR="build_artifact"
       - mkdir -p "$ARTIFACT_DIR"
       - cp -r .next public app package.json package-lock.json next.config.js scripts systemd appspec.yml "$ARTIFACT_DIR"/
-      - echo "Making all scripts executable"
       - chmod +x "$ARTIFACT_DIR"/scripts/*.sh
-      - echo "Listing artifact contents for verification"
+      - echo "Artifact contents:"
       - ls -l "$ARTIFACT_DIR"
-      - echo "Listing scripts permissions"
       - ls -l "$ARTIFACT_DIR/scripts"
-      - echo "Listing systemd service"
       - ls -l "$ARTIFACT_DIR/systemd"
-      - echo "Checking appspec.yml"
       - ls -l "$ARTIFACT_DIR/appspec.yml"
 
 artifacts:
