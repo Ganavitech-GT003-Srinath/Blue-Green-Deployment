@@ -2,7 +2,7 @@ export default function Page() {
   return (
     <main style={{ padding: 20, fontFamily: 'sans-serif' }}>
       <h1>Next.js Blue/Green Demo</h1>
-      <p>Version 4</p>
+      <p>Version 5-Alpha</p>
     </main>
   );
 }
