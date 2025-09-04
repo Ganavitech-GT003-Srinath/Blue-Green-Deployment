@@ -1,0 +1,122 @@
+/*
+  Professional, neat, and modern base styles
+  - Subtle colors, generous whitespace
+  - Clean typography, accessible focus states
+*/
+
+/* 1) CSS Variables */
+:root {
+  --bg: #f7f8fa;         /* Page background */
+  --card: #ffffff;       /* Surface background */
+  --text: #0f172a;       /* Primary text */
+  --muted: #475569;      /* Secondary text */
+  --border: #e5e7eb;     /* Soft borders */
+  --primary: #2563eb;    /* Accent blue */
+  --primary-600: #1d4ed8;/* Hover accent */
+  --ring: #93c5fd;       /* Focus ring */
+  --radius: 12px;        /* Default radius */
+  --shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
+}
+
+/* 2) Reset + base */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+
+/* Keep the system font used in the app, align other base styles here */
+body, .app-body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, svg, video, canvas { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* 3) Layout - style the main app area as a neat "card" */
+main {
+  width: 100%;
+  max-width: 960px;
+  margin: 56px auto;
+  padding: 32px 28px; /* works alongside any inline padding */
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* 4) Typography */
+h1 {
+  margin: 0 0 12px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+p {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+
+/* Fine-tuned sizes for a balanced, professional look */
+@media (min-width: 480px) {
+  h1 { font-size: 1.9rem; }
+  p { font-size: 1.02rem; }
+}
+@media (min-width: 768px) {
+  h1 { font-size: 2.1rem; }
+  p { font-size: 1.06rem; }
+}
+
+/* 5) Links */
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+  border-radius: 6px;
+}
+
+/* 6) Buttons (if you add any) */
+.button, button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  box-shadow: 0 1px 0 rgba(2,6,23,0.02);
+  transition: background .15s ease, transform .05s ease, box-shadow .15s ease;
+  cursor: pointer;
+}
+.button:hover, button:hover { background: var(--primary-600); }
+.button:active, button:active { transform: translateY(1px); }
+.button:focus-visible, button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* 7) Subtle utilities */
+.hr { height: 1px; background: var(--border); border: 0; }
+.muted { color: var(--muted); }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+/* 8) Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
