@@ -45,5 +45,3 @@ scripts/*.tmp
 # Ignore build scripts output (if any)
 *.out
 *.bak
-
-# Ignore public uploads (if any)
